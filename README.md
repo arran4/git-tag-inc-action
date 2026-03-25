@@ -17,8 +17,18 @@ jobs:
       - name: Use git-tag-inc Action
         uses: arran4/git-tag-inc-action@v1
         with:
-          # Optional: specify an action
-          action: 'bump'
+          # Optional: specify an action (major, minor, patch, release, etc.)
+          action: 'patch'
+
+      - name: Use git-tag-inc Action (skip forwards)
+        uses: arran4/git-tag-inc-action@v1
+        with:
+          action: '--skip-forwards test1'
+
+      - name: Use git-tag-inc Action (dry run)
+        uses: arran4/git-tag-inc-action@v1
+        with:
+          action: '--dry patch'
 ```
 
 ## Inputs
