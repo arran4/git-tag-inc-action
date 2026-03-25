@@ -1,0 +1,37 @@
+name: 'git-tag-inc-action'
+description: 'Download, install and run git-tag-inc'
+author: 'arran4'
+
+branding:
+  icon: 'package'
+  color: 'blue'
+
+inputs:
+  version:
+    description: 'The version of git-tag-inc to install (e.g. "latest", "v0.0.18").'
+    required: false
+    default: 'latest'
+  github-token:
+    description: 'GitHub token to authenticate API requests to prevent rate limiting.'
+    required: false
+    default: ${{ github.token }}
+  action:
+    description: 'The action to run with git-tag-inc.'
+    required: false
+    default: ''
+  mode:
+    description: 'The execution mode: "install", "install and run", or "run".'
+    required: false
+    default: 'install and run'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run setup script
+      if: ${{ inputs.mode == 'install' || inputs.mode == 'install and run' }}
+      run: bash $GITHUB_ACTION_PATH/setup.sh "${{ inputs.version }}" "${{ inputs.github-token }}"
+      shell: bash
+    - name: Run git-tag-inc action
+      if: ${{ inputs.mode == 'run' || inputs.mode == 'install and run' }}
+      run: git-tag-inc ${{ inputs.action }}
+      shell: bash
