@@ -18,7 +18,7 @@ jobs:
         uses: arran4/git-tag-inc-action@v1
         with:
           # Optional: specify an action
-          action: 'bump'
+          action: 'patch'
 ```
 
 ## Inputs
