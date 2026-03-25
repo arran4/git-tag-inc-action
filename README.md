@@ -17,8 +17,18 @@ jobs:
       - name: Use git-tag-inc Action
         uses: arran4/git-tag-inc-action@v1
         with:
-          # Optional: specify an action (major, minor, patch, release, etc.)
+          # Optional: specify an action
           action: 'patch'
+
+      - name: Use git-tag-inc Action (Minor)
+        uses: arran4/git-tag-inc-action@v1
+        with:
+          action: 'minor'
+
+      - name: Use git-tag-inc Action (Combination)
+        uses: arran4/git-tag-inc-action@v1
+        with:
+          action: 'patch rc2'
 
       - name: Use git-tag-inc Action (skip forwards)
         uses: arran4/git-tag-inc-action@v1
