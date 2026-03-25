@@ -29,6 +29,16 @@ jobs:
         uses: arran4/git-tag-inc-action@v1
         with:
           action: 'patch rc2'
+
+      - name: Use git-tag-inc Action (skip forwards)
+        uses: arran4/git-tag-inc-action@v1
+        with:
+          action: '--skip-forwards test1'
+
+      - name: Use git-tag-inc Action (dry run)
+        uses: arran4/git-tag-inc-action@v1
+        with:
+          action: '--dry patch'
 ```
 
 ## Inputs
