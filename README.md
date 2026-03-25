@@ -19,6 +19,16 @@ jobs:
         with:
           # Optional: specify an action
           action: 'patch'
+
+      - name: Use git-tag-inc Action (Minor)
+        uses: arran4/git-tag-inc-action@v1
+        with:
+          action: 'minor'
+
+      - name: Use git-tag-inc Action (Combination)
+        uses: arran4/git-tag-inc-action@v1
+        with:
+          action: 'patch rc2'
 ```
 
 ## Inputs
