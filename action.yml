@@ -24,6 +24,11 @@ inputs:
     required: false
     default: 'install and run'
 
+outputs:
+  version:
+    description: 'The resulting version tag.'
+    value: ${{ steps.run-action.outputs.version }}
+
 runs:
   using: 'composite'
   steps:
@@ -32,6 +37,10 @@ runs:
       run: bash $GITHUB_ACTION_PATH/setup.sh "${{ inputs.version }}" "${{ inputs.github-token }}"
       shell: bash
     - name: Run git-tag-inc action
+      id: run-action
       if: ${{ inputs.mode == 'run' || inputs.mode == 'install and run' }}
-      run: git-tag-inc ${{ inputs.action }}
+      run: |
+        git-tag-inc ${{ inputs.action }}
+        VERSION=$(git describe --tags --abbrev=0)
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
       shell: bash
