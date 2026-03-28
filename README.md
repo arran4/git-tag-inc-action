@@ -39,6 +39,14 @@ jobs:
         uses: arran4/git-tag-inc-action@v1
         with:
           action: '--dry patch'
+
+      - name: Use git-tag-inc Action (capture version)
+        id: tagger
+        uses: arran4/git-tag-inc-action@v1
+        with:
+          action: 'patch'
+      - name: Print captured version
+        run: echo "The new version is ${{ steps.tagger.outputs.version }}"
 ```
 
 ## Inputs
@@ -49,6 +57,12 @@ jobs:
 | `github-token` | GitHub token to authenticate API requests to prevent rate limiting. | `${{ github.token }}` | No |
 | `action` | The action to run with `git-tag-inc`. | `''` | No |
 | `mode` | The execution mode: `install`, `install and run`, or `run`. | `install and run` | No |
+
+## Outputs
+
+| Name | Description |
+|---|---|
+| `version` | The resulting version tag after running `git-tag-inc`. |
 
 ## License
 
