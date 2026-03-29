@@ -56,6 +56,7 @@ jobs:
 | `version` | The version of `git-tag-inc` to install (e.g. `latest`, `v0.0.18`). | `latest` | No |
 | `github-token` | GitHub token to authenticate API requests to prevent rate limiting. | `${{ github.token }}` | No |
 | `action` | The action to run with `git-tag-inc`. | `''` | No |
+| `ignore-same-hash` | Ignore the error when `git-tag-inc` reports the hash is the same as the previous tag. | `true` | No |
 | `mode` | The execution mode: `install`, `install and run`, or `run`. | `install and run` | No |
 
 ## Outputs

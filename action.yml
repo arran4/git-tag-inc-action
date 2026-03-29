@@ -19,6 +19,10 @@ inputs:
     description: 'The action to run with git-tag-inc.'
     required: false
     default: ''
+  ignore-same-hash:
+    description: 'Ignore the error when git-tag-inc reports the hash is the same as the previous tag.'
+    required: false
+    default: 'true'
   mode:
     description: 'The execution mode: "install", "install and run", or "run".'
     required: false
@@ -40,7 +44,18 @@ runs:
       id: run-action
       if: ${{ inputs.mode == 'run' || inputs.mode == 'install and run' }}
       run: |
-        git-tag-inc ${{ inputs.action }}
+        set +e
+        OUTPUT=$(git-tag-inc ${{ inputs.action }} 2>&1)
+        EXIT_CODE=$?
+        set -e
+        echo "$OUTPUT"
+        if [ $EXIT_CODE -ne 0 ]; then
+          if [ "${{ inputs.ignore-same-hash }}" = 'true' ] && echo "$OUTPUT" | grep -q "Hash is the same for this and previous tag"; then
+            echo "Ignoring same hash error as requested."
+          else
+            exit $EXIT_CODE
+          fi
+        fi
         VERSION=$(git describe --tags --abbrev=0)
         echo "version=$VERSION" >> "$GITHUB_OUTPUT"
       shell: bash
