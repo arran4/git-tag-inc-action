@@ -3,9 +3,39 @@ set -e
 
 VERSION="${1:-latest}"
 GITHUB_TOKEN="${2}"
+REF="${3}"
 
 echo "Starting git-tag-inc setup..."
 echo "Requested version: $VERSION"
+if [ -n "$REF" ]; then
+  echo "Requested ref: $REF"
+fi
+
+if [ -n "$REF" ]; then
+  echo "Building git-tag-inc from source using go install github.com/arran4/git-tag-inc/...@$REF"
+  go install github.com/arran4/git-tag-inc/...@$REF
+
+  GOPATH=$(go env GOPATH)
+  if [ -z "$GOPATH" ]; then
+    GOPATH="$HOME/go"
+  fi
+  GOBIN=$(go env GOBIN)
+  if [ -z "$GOBIN" ]; then
+    GOBIN="$GOPATH/bin"
+  fi
+
+  if [ -n "$GITHUB_PATH" ]; then
+    echo "$GOBIN" >> "$GITHUB_PATH"
+    echo "Added $GOBIN to GITHUB_PATH"
+  else
+    echo "Warning: GITHUB_PATH is not set. Assuming local run."
+    export PATH="$GOBIN:$PATH"
+  fi
+
+  echo "Successfully installed git-tag-inc from ref $REF"
+  "$GOBIN/git-tag-inc" --help || true
+  exit 0
+fi
 
 # Detect OS
 OS="linux"

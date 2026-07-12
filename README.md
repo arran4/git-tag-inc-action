@@ -35,6 +35,11 @@ jobs:
         with:
           action: '--skip-forwards test1'
 
+      - name: Use git-tag-inc Action (override ref for dev testing)
+        uses: arran4/git-tag-inc-action@v1
+        with:
+          ref: 'main'
+
       - name: Use git-tag-inc Action (dry run)
         uses: arran4/git-tag-inc-action@v1
         with:
@@ -55,6 +60,7 @@ jobs:
 |---|---|---|---|
 | `version` | The version of `git-tag-inc` to install (e.g. `latest`, `v0.0.18`). | `latest` | No |
 | `github-token` | GitHub token to authenticate API requests to prevent rate limiting. | `${{ github.token }}` | No |
+| `ref` | The branch, tag, or ref to run from instead of downloading a specific version (e.g., `main`, `v0.0.18`). This overrides `version` and builds from source using go install for dev testing purposes. | `''` | No |
 | `action` | The action to run with `git-tag-inc`. | `''` | No |
 | `mode` | The execution mode: `install`, `install and run`, or `run`. | `install and run` | No |
 
