@@ -54,6 +54,32 @@ jobs:
         run: echo "The new version is ${{ steps.tagger.outputs.version }}"
 ```
 
+```yaml
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'The action to run with git-tag-inc'
+        type: choice
+        required: true
+        default: 'patch'
+        options:
+          - patch
+          - minor
+          - major
+          - release
+          - test
+          - uat
+          - alpha
+          - beta
+          - rc
+          - next
+      force:
+        description: 'Force'
+        type: boolean
+        required: true
+        default: true
+```
+
 ## Inputs
 
 | Name | Description | Default | Required |
