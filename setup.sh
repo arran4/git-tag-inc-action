@@ -12,8 +12,13 @@ if [ -n "$REF" ]; then
 fi
 
 if [ -n "$REF" ]; then
+  if ! command -v go >/dev/null 2>&1; then
+    echo "Error: The 'go' command is required to build from a ref, but it was not found in PATH."
+    exit 1
+  fi
+
   echo "Building git-tag-inc from source using go install github.com/arran4/git-tag-inc/...@$REF"
-  go install github.com/arran4/git-tag-inc/...@$REF
+  go install "github.com/arran4/git-tag-inc/...@$REF"
 
   GOPATH=$(go env GOPATH)
   if [ -z "$GOPATH" ]; then
