@@ -55,6 +55,7 @@ jobs:
 ```
 
 ```yaml
+on:
   workflow_dispatch:
     inputs:
       action:
@@ -73,11 +74,16 @@ jobs:
           - beta
           - rc
           - next
-      force:
-        description: 'Force'
-        type: boolean
-        required: true
-        default: true
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run git-tag-inc
+        uses: arran4/git-tag-inc-action@v1
+        with:
+          action: ${{ github.event.inputs.action }}
 ```
 
 ## Inputs
