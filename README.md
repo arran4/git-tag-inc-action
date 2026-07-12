@@ -54,6 +54,38 @@ jobs:
         run: echo "The new version is ${{ steps.tagger.outputs.version }}"
 ```
 
+```yaml
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'The action to run with git-tag-inc'
+        type: choice
+        required: true
+        default: 'patch'
+        options:
+          - patch
+          - minor
+          - major
+          - release
+          - test
+          - uat
+          - alpha
+          - beta
+          - rc
+          - next
+
+jobs:
+  tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run git-tag-inc
+        uses: arran4/git-tag-inc-action@v1
+        with:
+          action: ${{ github.event.inputs.action }}
+```
+
 ## Inputs
 
 | Name | Description | Default | Required |
