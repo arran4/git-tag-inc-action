@@ -11,6 +11,10 @@ inputs:
     description: 'The version of git-tag-inc to install (e.g. "latest", "v0.0.18").'
     required: false
     default: 'latest'
+  sha256:
+    description: 'Optional expected SHA256 for the downloaded git-tag-inc archive. Recommended for release-critical pinned installs.'
+    required: false
+    default: ''
   github-token:
     description: 'GitHub token to authenticate API requests to prevent rate limiting.'
     required: false
@@ -38,13 +42,21 @@ runs:
   steps:
     - name: Run setup script
       if: ${{ inputs.mode == 'install' || inputs.mode == 'install and run' }}
-      run: bash $GITHUB_ACTION_PATH/setup.sh "${{ inputs.version }}" "${{ inputs.github-token }}" "${{ inputs.ref }}"
+      env:
+        INPUT_VERSION: ${{ inputs.version }}
+        INPUT_SHA256: ${{ inputs.sha256 }}
+        INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
+        INPUT_REF: ${{ inputs.ref }}
+      run: bash "$GITHUB_ACTION_PATH/setup.sh" "$INPUT_VERSION" "$INPUT_GITHUB_TOKEN" "$INPUT_REF" "$INPUT_SHA256"
       shell: bash
     - name: Run git-tag-inc action
       id: run-action
       if: ${{ inputs.mode == 'run' || inputs.mode == 'install and run' }}
+      env:
+        INPUT_ACTION: ${{ inputs.action }}
       run: |
-        git-tag-inc ${{ inputs.action }}
+        read -r -a GIT_TAG_INC_ARGS <<< "$INPUT_ACTION"
+        git-tag-inc "${GIT_TAG_INC_ARGS[@]}"
         VERSION=$(git describe --tags --abbrev=0)
         echo "version=$VERSION" >> "$GITHUB_OUTPUT"
       shell: bash
