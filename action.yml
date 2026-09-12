@@ -11,10 +11,6 @@ inputs:
     description: 'The version of git-tag-inc to install (e.g. "latest", "v0.0.18").'
     required: false
     default: 'latest'
-  sha256:
-    description: 'Optional expected SHA256 for the downloaded git-tag-inc archive. Recommended for release-critical pinned installs.'
-    required: false
-    default: ''
   github-token:
     description: 'GitHub token to authenticate API requests to prevent rate limiting.'
     required: false
@@ -44,10 +40,9 @@ runs:
       if: ${{ inputs.mode == 'install' || inputs.mode == 'install and run' }}
       env:
         INPUT_VERSION: ${{ inputs.version }}
-        INPUT_SHA256: ${{ inputs.sha256 }}
         INPUT_GITHUB_TOKEN: ${{ inputs.github-token }}
         INPUT_REF: ${{ inputs.ref }}
-      run: bash "$GITHUB_ACTION_PATH/setup.sh" "$INPUT_VERSION" "$INPUT_GITHUB_TOKEN" "$INPUT_REF" "$INPUT_SHA256"
+      run: bash "$GITHUB_ACTION_PATH/setup.sh" "$INPUT_VERSION" "$INPUT_GITHUB_TOKEN" "$INPUT_REF"
       shell: bash
     - name: Run git-tag-inc action
       id: run-action
