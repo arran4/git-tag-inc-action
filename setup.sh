@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
 
 VERSION="${1:-latest}"
-GITHUB_TOKEN="${2}"
-REF="${3}"
+GITHUB_TOKEN="${2:-}"
+REF="${3:-}"
+EXPECTED_SHA256="${4:-}"
 
 echo "Starting git-tag-inc setup..."
 echo "Requested version: $VERSION"
@@ -29,7 +30,7 @@ if [ -n "$REF" ]; then
     GOBIN="$GOPATH/bin"
   fi
 
-  if [ -n "$GITHUB_PATH" ]; then
+  if [ -n "${GITHUB_PATH:-}" ]; then
     echo "$GOBIN" >> "$GITHUB_PATH"
     echo "Added $GOBIN to GITHUB_PATH"
   else
@@ -38,23 +39,23 @@ if [ -n "$REF" ]; then
   fi
 
   echo "Successfully installed git-tag-inc from ref $REF"
-  "$GOBIN/git-tag-inc" --help || true
+  "$GOBIN/git-tag-inc" lint --help >/dev/null
   exit 0
 fi
 
 # Detect OS
 OS="linux"
-if [ "$RUNNER_OS" = "macOS" ]; then
+if [ "${RUNNER_OS:-}" = "macOS" ]; then
   OS="darwin"
-elif [ "$RUNNER_OS" = "Windows" ]; then
+elif [ "${RUNNER_OS:-}" = "Windows" ]; then
   OS="windows"
 fi
 
 # Detect Architecture
 ARCH="amd64"
-if [ "$RUNNER_ARCH" = "ARM64" ]; then
+if [ "${RUNNER_ARCH:-}" = "ARM64" ]; then
   ARCH="arm64"
-elif [ "$RUNNER_ARCH" = "ARM32" ]; then
+elif [ "${RUNNER_ARCH:-}" = "ARM32" ]; then
   ARCH="armv7"
 fi
 
@@ -107,6 +108,7 @@ DOWNLOAD_URL="https://github.com/arran4/git-tag-inc/releases/download/${TAG_NAME
 
 echo "Downloading from: $DOWNLOAD_URL"
 TEMP_DIR=$(mktemp -d)
+trap 'rm -rf "$TEMP_DIR"' EXIT
 cd "$TEMP_DIR"
 
 # Download the file
@@ -116,6 +118,33 @@ curl -sL -f -o "$FILENAME" "$DOWNLOAD_URL" || {
 }
 
 echo "Download successful."
+
+# Release-critical callers can pin the expected digest so the downloaded
+# archive is verified independently of mutable release metadata.
+if [ -n "$EXPECTED_SHA256" ]; then
+  if ! [[ "$EXPECTED_SHA256" =~ ^[0-9a-fA-F]{64}$ ]]; then
+    echo "Error: sha256 must be exactly 64 hexadecimal characters."
+    exit 1
+  fi
+
+  if command -v sha256sum >/dev/null 2>&1; then
+    printf '%s  %s\n' "$EXPECTED_SHA256" "$FILENAME" | sha256sum -c -
+  elif command -v shasum >/dev/null 2>&1; then
+    ACTUAL_SHA256=$(shasum -a 256 "$FILENAME" | awk '{print $1}')
+    if [ "${ACTUAL_SHA256,,}" != "${EXPECTED_SHA256,,}" ]; then
+      echo "Error: SHA256 mismatch for $FILENAME."
+      echo "Expected: $EXPECTED_SHA256"
+      echo "Actual:   $ACTUAL_SHA256"
+      exit 1
+    fi
+    echo "$FILENAME: OK"
+  else
+    echo "Error: Cannot verify SHA256 because neither sha256sum nor shasum is available."
+    exit 1
+  fi
+else
+  echo "Warning: no expected SHA256 supplied; archive integrity is not independently pinned."
+fi
 
 # Extract and install
 INSTALL_DIR="/opt/git-tag-inc"
@@ -140,7 +169,7 @@ if [ "$OS" != "windows" ]; then
 fi
 
 # Add to GITHUB_PATH
-if [ -n "$GITHUB_PATH" ]; then
+if [ -n "${GITHUB_PATH:-}" ]; then
   echo "$INSTALL_DIR" >> "$GITHUB_PATH"
   echo "Added $INSTALL_DIR to GITHUB_PATH"
 else
@@ -149,4 +178,4 @@ else
 fi
 
 echo "Successfully installed git-tag-inc $TAG_NAME"
-"$INSTALL_DIR/git-tag-inc" --help || true
+"$INSTALL_DIR/git-tag-inc" lint --help >/dev/null
