@@ -131,7 +131,8 @@ if [ -n "$EXPECTED_SHA256" ]; then
     printf '%s  %s\n' "$EXPECTED_SHA256" "$FILENAME" | sha256sum -c -
   elif command -v shasum >/dev/null 2>&1; then
     ACTUAL_SHA256=$(shasum -a 256 "$FILENAME" | awk '{print $1}')
-    if [ "${ACTUAL_SHA256,,}" != "${EXPECTED_SHA256,,}" ]; then
+    EXPECTED_SHA256_LOWER=$(printf '%s' "$EXPECTED_SHA256" | tr '[:upper:]' '[:lower:]')
+    if [ "$ACTUAL_SHA256" != "$EXPECTED_SHA256_LOWER" ]; then
       echo "Error: SHA256 mismatch for $FILENAME."
       echo "Expected: $EXPECTED_SHA256"
       echo "Actual:   $ACTUAL_SHA256"
