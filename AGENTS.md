@@ -26,12 +26,19 @@ When working on this codebase, please adhere to the following rules and guidelin
 - In this repository's composite action configurations (like `action.yml`), shell scripts should be executed explicitly using `bash`.
 - For example, use: `bash $GITHUB_ACTION_PATH/setup.sh`.
 - **Do not** call them directly. This prevents "Permission denied" (exit code 126) errors caused by lost executable bits in the runner environment.
+- **Never interpolate action inputs directly into `run:` shell source.** Pass inputs through step `env:` variables or positional arguments, then quote/parse them as data inside the shell script.
+- When an input represents multiple CLI arguments, construct an argument array and invoke the target command with `"${args[@]}"`; do not use `eval`.
 
-## 7. Local Execution of Setup Scripts
+## 7. Release-critical binary installation
+- Production/release workflows should be able to pin both the `git-tag-inc` release version and the expected SHA256 of the downloaded archive.
+- Keep checksum verification inside the action so downstream repositories do not need to duplicate installer scripts.
+- Preserve backwards compatibility where practical, but document that release-critical callers should supply the checksum pin.
+
+## 8. Local Execution of Setup Scripts
 - Local execution of `setup.sh` requires simulating the GitHub Actions runner environment.
 - You must set variables like `RUNNER_OS` and `RUNNER_ARCH`.
 - Example: `RUNNER_OS=Linux RUNNER_ARCH=X86 ./setup.sh latest ""`
 
-## 8. Validation Techniques
+## 9. Validation Techniques
 - **YAML configurations**: Can be validated using PyYAML (installable via `python3 -m pip install pyyaml`) and evaluated with `python3 -c 'import yaml; yaml.safe_load(open("filename.yml"))'`.
 - **Shell scripts**: Can be syntax-checked using `bash -n`.
